@@ -1,0 +1,21 @@
+.workout-page {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 0;
+  max-width: 350px;
+  margin: 0 auto;
+}
+
+.search-bar {
+  --background: var(--color-card);
+  --border-radius: 20px;
+  --placeholder-color: var(--color-inactive);
+  --icon-color: var(--color-inactive);
+}
+
+.exercise-counter {
+  color: var(--color-inactive);
+  text-transform: uppercase;
+  padding-inline: 20px;
+}

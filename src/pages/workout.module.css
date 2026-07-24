@@ -1,0 +1,29 @@
+.workout-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 16px 0;
+  max-width: 350px;
+  margin: 0 auto;
+}
+
+.logged-exercises {
+  color: var(--color-inactive);
+  text-transform: uppercase;
+  padding-inline: 20px;
+}
+
+.day-info {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.selected-day {
+  align-self: flex-start;
+}
+
+.count-exercises {
+  color: var(--color-inactive);
+}

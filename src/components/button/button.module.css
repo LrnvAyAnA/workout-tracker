@@ -1,0 +1,65 @@
+.button-add-exercise {
+  --color: var(--color-inactive);
+  --background: var(--color-primary);
+  --border-style: dashed;
+  --border-color: var(--color-inactive);
+  --border-radius: 20px;
+  --border-width: 2px;
+  max-width: 350px;
+}
+
+.button-add-exercise:active {
+  --color: var(--color-accent);
+  --border-color: var(--color-accent);
+}
+
+.button-add-set {
+  --color: var(--color-primary);
+  --background: var(--color-accent);
+  --border-radius: 20px;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  flex: 1;
+}
+
+.button-add-set::part(native) {
+  padding-inline: 3em;
+}
+
+.button-add-set:active {
+  --background: #cdcd00;
+}
+
+.button-icon::part(native) {
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.button-icon {
+  /* position: absolute; */
+  /* margin-left: 58px; */
+  /* top: 50%; */
+  /* transform: translateY(-50%); */
+  /* z-index: 5; */
+  --background: var(--color-accent);
+  height: 36px;
+  width: 36px;
+  --border-radius: 50px;
+  margin: 0;
+}
+
+.button-chip {
+  --background: var(--color-card);
+  --color: var(--color-inactive);
+  --border-radius: 20px;
+  font-size: 12px;
+}
+
+.button-chip-active {
+  --background: var(--color-accent);
+  --color: var(--color-inactive);
+  font-size: 12px;
+  --border-radius: 20px;
+}

@@ -1,0 +1,25 @@
+.edit-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.input-value {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  border: 1px solid var(--color-card);
+  border-radius: 20px;
+}
+
+.input-value input {
+  background: transparent;
+  color: #fff;
+  text-align: center;
+  width: 3ch;
+}
+
+.input-value.active {
+  border-color: var(--color-accent);
+}

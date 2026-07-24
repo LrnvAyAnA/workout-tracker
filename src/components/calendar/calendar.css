@@ -1,0 +1,55 @@
+
+ion-datetime::part(month-year-button) {
+  display: none;
+}
+
+ion-datetime {
+  background: #111120;
+  border-radius: 20px;
+}
+
+ion-datetime::part(calendar-day) {
+  color: #ffffff;
+}
+
+ion-datetime::part(calendar-day active) {
+  background: var(--color-accent);
+  border: 1px solid var(--color-accent);
+  color: #000000;
+}
+
+ion-datetime::part(calendar-day today) {
+  border: 1px solid var(--color-accent);
+  color: var(--color-accent);
+}
+
+ion-datetime::part(calendar-day today active) {
+  background: var(--color-accent);
+  color: #000000;
+}
+
+ion-datetime::part(navigation-button) {
+  display: none;
+}
+
+.calendar {
+  display: inline-flex;
+  flex-direction: column;
+  background-color: #111120;
+  border-radius: 20px;
+  justify-content: center;
+}
+
+.custom-calendar-header {
+  display: flex;
+  align-items: center;
+  text-transform: uppercase;
+  justify-content: space-between;
+  padding: 5px 10px;
+}
+
+.calendar-btn {
+  --color: #fff;
+  border-radius: 50px;
+  background-color: #1A1A2E;
+}

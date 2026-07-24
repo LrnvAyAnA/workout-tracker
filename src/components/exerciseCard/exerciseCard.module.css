@@ -1,0 +1,49 @@
+.exercise-card {
+  width: 100%;
+  background-color: var(--color-card);
+  border-radius: 20px;
+  align-items: center;
+  max-width: 350px;
+  padding: 16px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.exercise-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.exercise-name {
+  font-size: 16px;
+}
+
+.exercise-card span {
+  font-weight: 400;
+  font-size: 12px;
+}
+
+.category {
+  text-transform: uppercase;
+  color: var(--color-inactive);
+}
+
+.weight-info {
+  display: flex;
+  flex-direction: column;
+  align-items: end;
+}
+
+.last-used {
+  color: var(--color-inactive);
+}
+
+.used-weight {
+  color: var(--color-accent);
+}
+
+.unit {
+  color: var(--color-inactive);
+}
