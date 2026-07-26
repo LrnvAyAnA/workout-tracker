@@ -1,7 +1,8 @@
 :root {
-  --color-primary: #08080F;
+  --color-primary: #08080f;
   --color-card: #111120;
-  --color-inactive: #6B6B8A;
+  --color-field: #1a1a2e;
+  --color-inactive: #6b6b8a;
   --color-accent: #ffff99;
   --ion-font-family: "Golos Text", sans-serif;
 }
@@ -31,7 +32,7 @@ ion-toolbar {
 }
 
 ion-title {
-  font-size: 2em;;
+  font-size: 2em;
 }
 
 ion-tab-bar {

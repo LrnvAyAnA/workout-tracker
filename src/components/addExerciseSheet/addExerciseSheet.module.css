@@ -1,0 +1,41 @@
+.custom-modal::part(handle) {
+  background: var(--color-accent);
+}
+
+.custom-modal {
+  --background: var(--color-primary);
+  --width: 100%;
+}
+
+.custom-modal::part(content) {
+  border-radius: 20px;
+  border: 1px solid var(--color-inactive);
+}
+
+.modal-content {
+  cursor: pointer;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  width: fit-content;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+.title {
+  display: block;
+  text-align: start;
+  width: 100%;
+}
+
+.title h2 {
+  font-size: 18px;
+}
+
+.exercise-select-item {
+  width: 100%;
+  border: 1px solid var(--color-inactive);
+  border-radius: 20px;
+}

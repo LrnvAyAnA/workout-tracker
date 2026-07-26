@@ -7,15 +7,24 @@
   margin: 0 auto;
 }
 
-.search-bar {
-  --background: var(--color-card);
-  --border-radius: 20px;
-  --placeholder-color: var(--color-inactive);
-  --icon-color: var(--color-inactive);
-}
-
 .exercise-counter {
   color: var(--color-inactive);
   text-transform: uppercase;
   padding-inline: 20px;
+}
+
+.ion-item::part(native) {
+  background: var(--color-card);
+  padding: 0;
+  border-radius: 20px;
+}
+
+.ion-item::part(inner) {
+  padding: 0;
+  --border-color: transparent;
+}
+
+.button-trash {
+  border-radius: 20px;
+  border: none;
 }

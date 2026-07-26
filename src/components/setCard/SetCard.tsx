@@ -28,7 +28,7 @@ const SetCard = ({ data }: SetCardProps) => {
   const [sets, setSets] = useState<Set[]>(data.sets);
 
   const [editing, setEditing] = useState<EditingField | null>(null);
-
+  const [invalidSetId, setInvalidSetId] = useState<number | null>(null);
   const handleUpdateReps = (setId: number, newReps: number) => {
     console.log("newReps", newReps);
     setSets((prev) =>
@@ -154,13 +154,13 @@ const SetCard = ({ data }: SetCardProps) => {
                           editing?.setId === set.id &&
                           editing.field === "weight"
                         }
-                        onFocus={() =>
+                        onFocus={() => {
                           setEditing({
                             setId: set.id,
                             field: "weight",
                             value: set.usedWeight,
-                          })
-                        }
+                          });
+                        }}
                         onBlur={() => {
                           setTimeout(() => {
                             setEditing(null);
