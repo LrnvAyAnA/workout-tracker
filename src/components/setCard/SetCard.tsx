@@ -46,14 +46,18 @@ const SetCard = ({ data }: SetCardProps) => {
   };
 
   const handleAddSet = () => {
-    const lastSet = sets.length > 0 ? sets[sets.length - 1] : null;
+    const lastSet = sets.at(-1);
+
+    const initialWeight = data.exercise.defaultWeight;
+    console.log(data.exercise);
+    const initialReps = lastSet?.reps ?? 0;
 
     const newSet: Set = {
       id: Date.now(),
       exerciseId: data.exercise.id,
-      workoutId: lastSet ? lastSet.workoutId : 0,
-      reps: lastSet ? lastSet.reps : 0,
-      usedWeight: lastSet ? lastSet.usedWeight : 0,
+      workoutId: lastSet?.workoutId ?? 0,
+      reps: initialReps,
+      usedWeight: initialWeight ?? 0,
     };
 
     setSets((prevSets) => [...prevSets, newSet]);
@@ -141,54 +145,56 @@ const SetCard = ({ data }: SetCardProps) => {
                       )}
                     </span>
                   </div>
-                  <div className={styles["set-weight"]}>
-                    <span className={styles["number-weight"]}>
-                      <InlineNumberInput
-                        value={
-                          editing?.setId === set.id &&
-                          editing.field === "weight"
-                            ? editing.value
-                            : set.usedWeight
-                        }
-                        isVisible={
-                          editing?.setId === set.id &&
-                          editing.field === "weight"
-                        }
-                        onFocus={() => {
-                          setEditing({
-                            setId: set.id,
-                            field: "weight",
-                            value: set.usedWeight,
-                          });
-                        }}
-                        onBlur={() => {
-                          setTimeout(() => {
-                            setEditing(null);
-                          }, 150);
-                        }}
-                        onChange={(newValue) =>
-                          setEditing({
-                            setId: set.id,
-                            value: newValue,
-                            field: "weight",
-                          })
-                        }
-                      />
-                    </span>
-                    <span className={styles["text-weight"]}>
-                      {editing?.setId === set.id &&
-                      editing.field === "weight" ? (
-                        <Button
-                          variant="icon"
-                          onClick={() => handleSave(editing)}
-                        >
-                          <CheckMark width={16} height={16} />
-                        </Button>
-                      ) : (
-                        "kg"
-                      )}
-                    </span>
-                  </div>
+                  {data.exercise.isUsesWeight ? (
+                    <div className={styles["set-weight"]}>
+                      <span className={styles["number-weight"]}>
+                        <InlineNumberInput
+                          value={
+                            editing?.setId === set.id &&
+                            editing.field === "weight"
+                              ? editing.value
+                              : set.usedWeight
+                          }
+                          isVisible={
+                            editing?.setId === set.id &&
+                            editing.field === "weight"
+                          }
+                          onFocus={() => {
+                            setEditing({
+                              setId: set.id,
+                              field: "weight",
+                              value: set.usedWeight,
+                            });
+                          }}
+                          onBlur={() => {
+                            setTimeout(() => {
+                              setEditing(null);
+                            }, 150);
+                          }}
+                          onChange={(newValue) =>
+                            setEditing({
+                              setId: set.id,
+                              value: newValue,
+                              field: "weight",
+                            })
+                          }
+                        />
+                      </span>
+                      <span className={styles["text-weight"]}>
+                        {editing?.setId === set.id &&
+                        editing.field === "weight" ? (
+                          <Button
+                            variant="icon"
+                            onClick={() => handleSave(editing)}
+                          >
+                            <CheckMark width={16} height={16} />
+                          </Button>
+                        ) : (
+                          "kg"
+                        )}
+                      </span>
+                    </div>
+                  ) : null}
                 </div>
               </IonItem>
 

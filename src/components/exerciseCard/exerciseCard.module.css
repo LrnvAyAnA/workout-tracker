@@ -30,6 +30,12 @@
   color: var(--color-inactive);
 }
 
+.info {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+}
+
 .weight-info {
   display: flex;
   flex-direction: column;

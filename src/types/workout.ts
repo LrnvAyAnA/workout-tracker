@@ -7,11 +7,14 @@ export interface Exercise {
   id: number;
   name: string;
   categoryId: number;
+  defaultWeight?: number;
+  isUsesWeight: boolean;
 }
 
-export interface Workout {
+export interface WorkoutType {
   id: number;
   date: string;
+  status: "planned" | "completed";
 }
 
 export interface Set {
@@ -21,4 +24,3 @@ export interface Set {
   usedWeight: number;
   reps: number;
 }
-

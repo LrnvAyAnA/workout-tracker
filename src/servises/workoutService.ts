@@ -1,4 +1,8 @@
-import { Category, Exercise, Set, Workout } from "../types/workout";
+import { mockCategories } from "../data/mockCategories";
+import { mockExercises } from "../data/mockExercises";
+import { mockWorkouts } from "../data/mockWorkouts";
+import { CreateExerciseInput } from "../types/exercise";
+import { Category, Exercise, Set, WorkoutType } from "../types/workout";
 
 export function getWorkoutExercises(
   workoutId: number,
@@ -32,13 +36,9 @@ export function getWorkoutExercises(
     });
 }
 
-export function getCategories(categories: Category[]) {
-  return categories;
-}
-
-export function getExercisesWithLastWeight(
+export function getMockExercisesWithLastWeight(
   categories: Category[],
-  workouts: Workout[],
+  workouts: WorkoutType[],
   exercises: Exercise[],
   sets: Set[],
   categoryId?: number,
@@ -92,4 +92,56 @@ export function getExercisesWithLastWeight(
       lastWeight: weightEntry?.lastWeight,
     };
   });
+}
+
+export function createMockExercise(exercise: CreateExerciseInput): Exercise {
+  const newExercise: Exercise = {
+    id: Date.now(),
+    ...exercise,
+  };
+
+  mockExercises.push(newExercise);
+
+  return newExercise;
+}
+
+export function editMockExercise(id: number, exercise: CreateExerciseInput) {
+  const index = mockExercises.findIndex((item) => item.id === id);
+
+  if (index === -1) return;
+
+  mockExercises[index] = {
+    id,
+    ...exercise,
+  };
+}
+
+export function deleteMockExercise(id: number) {
+  const index = mockExercises.findIndex((exercise) => exercise.id === id);
+
+  if (index !== -1) {
+    mockExercises.splice(index, 1);
+  }
+}
+
+export function getMockCategories(): Category[] {
+  console.log("я был в маппинге");
+  return [...mockCategories];
+}
+
+export function getMockWorkoutByDate(date: string): WorkoutType | null {
+  return mockWorkouts.find((w) => w.date === date) ?? null;
+}
+
+export function createMockWorkout(
+  date: string,
+  status: "completed" | "planned",
+): WorkoutType {
+  const newWorkout: WorkoutType = {
+    id: Date.now(),
+    date,
+    status,
+  };
+  mockWorkouts.push(newWorkout);
+  return newWorkout;
 }

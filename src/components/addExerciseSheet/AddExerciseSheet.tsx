@@ -1,17 +1,16 @@
 import { IonModal } from "@ionic/react";
 import styles from "./addExerciseSheet.module.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CategoryBar from "../categoryBar/CategoryBar";
-import { getExercisesWithLastWeight } from "../../servises/workoutService";
-import { mockCategories } from "../../data/mockCategories";
-import { mockExercises } from "../../data/mockExercises";
-import { mockSets } from "../../data/mockSets";
-import { mockWorkouts } from "../../data/mockWorkouts";
+import {} from "../../servises/workoutService";
 import ExerciseCard from "../exerciseCard/ExerciseCard";
 import {
   ExerciseWithLastWeight,
   ExerciseWorkoutCard,
 } from "../../types/workoutCard";
+import { getExercisesWithLastWeight } from "../../database/repositories/exerciseRepository";
+import { Category } from "../../types/workout";
+import { getCategories } from "../../database/repositories/categoryRepository";
 
 type Props = {
   isOpen: boolean;
@@ -27,15 +26,31 @@ const AddExerciseSheet = ({
   workoutExercises,
 }: Props) => {
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
-  const exerciseData = getExercisesWithLastWeight(
-    mockCategories,
-    mockWorkouts,
-    mockExercises,
-    mockSets,
-    selectedCategory ?? undefined,
-  );
+  const [categories, setCategories] = useState<Category[]>([]);
 
-  const availableExercises = exerciseData.filter(
+  const [exercises, setExercises] = useState<ExerciseWithLastWeight[]>([]);
+
+  useEffect(() => {
+    loadCategories();
+  }, []);
+
+  async function loadCategories() {
+    const data = await getCategories();
+    setCategories(data);
+  }
+
+  useEffect(() => {
+    loadExercises();
+  }, [selectedCategory]);
+
+  async function loadExercises() {
+    const data = await getExercisesWithLastWeight(
+      selectedCategory ?? undefined,
+    );
+    setExercises(data);
+  }
+
+  const availableExercises = exercises.filter(
     (exercise) =>
       !workoutExercises.some((we) => we.exercise.id === exercise.id),
   );
@@ -53,6 +68,7 @@ const AddExerciseSheet = ({
           <h2>Add exercise</h2>
         </div>
         <CategoryBar
+          categories={categories}
           selectedCategory={selectedCategory}
           onSelectCategory={setSelectedCategory}
           showAllOption={true}

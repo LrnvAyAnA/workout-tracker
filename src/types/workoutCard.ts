@@ -1,4 +1,9 @@
-import { Exercise, Category, Set } from "./workout";
+import { Exercise, Category, Set, WorkoutType } from "./workout";
+
+export interface WorkoutDetails {
+  workout: WorkoutType;
+  exercises: ExerciseWorkoutCard[];
+}
 
 export interface ExerciseWorkoutCard {
   exercise: Exercise;

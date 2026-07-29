@@ -5,15 +5,20 @@ export const mockExercises: Exercise[] = [
     id: 1,
     name: "Жим лежа",
     categoryId: 1,
+    isUsesWeight: true,
+    defaultWeight: 10,
   },
   {
     id: 2,
     name: "Приседания",
     categoryId: 2,
+    isUsesWeight: false,
   },
   {
     id: 3,
     name: "Тяга верхнего блока",
     categoryId: 3,
+    isUsesWeight: true,
+    defaultWeight: 10,
   },
 ];

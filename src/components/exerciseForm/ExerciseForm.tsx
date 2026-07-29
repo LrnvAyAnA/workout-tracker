@@ -1,11 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CategoryBar from "../categoryBar/CategoryBar";
-import styles from "./addNewExercise.module.css";
-import InlineNumberInput from "../inlineNumberInput/InlineNumberInput";
+import styles from "./exerciseForm.module.css";
 import Close from "../../assets/icons/close.svg?react";
 
 import { IonToggle } from "@ionic/react";
 import Button from "../button/Button";
+import { CreateExerciseInput, ExerciseFormValues } from "../../types/exercise";
+import { Category } from "../../types/workout";
+import { getCategories } from "../../database/repositories/categoryRepository";
 
 type NewExerciseInput = {
   name: string;
@@ -15,32 +17,54 @@ type NewExerciseInput = {
 };
 
 type Props = {
+  initialValues?: ExerciseFormValues;
+  mode: "create" | "edit";
+  onSubmit: (exercise: CreateExerciseInput) => void;
   onClose: () => void;
-  onAddExercise: (newExercise: NewExerciseInput) => void;
 };
 
-const AddNewExercise = ({ onClose, onAddExercise }: Props) => {
-  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
-  const [isUsesWeight, setIsUsesWeight] = useState<boolean>(false);
-  const [name, setName] = useState("");
-  const [defaultWeight, setDefaultWeight] = useState<number | null>(null);
+const ExerciseForm = ({ onClose, onSubmit, initialValues, mode }: Props) => {
+  const [name, setName] = useState(initialValues?.name ?? "");
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<number | null>(
+    initialValues?.categoryId ?? null,
+  );
+  const [isUsesWeight, setIsUsesWeight] = useState(
+    initialValues?.isUsesWeight ?? false,
+  );
+  const [defaultWeight, setDefaultWeight] = useState(
+    initialValues?.defaultWeight,
+  );
+
+  useEffect(() => {
+    getCategories().then(setCategories);
+  }, []);
 
   const handleAdd = () => {
     if (selectedCategory === null) {
-      return; //показать ошибку
+      return;
     }
 
-    onAddExercise({
-      name: name,
+    if (name.trim() === "") {
+      return;
+    }
+
+    if (isUsesWeight && defaultWeight === undefined) {
+      return;
+    }
+
+    onSubmit({
+      name,
       categoryId: selectedCategory,
-      isUsesWeight: isUsesWeight,
-      defaultWeight: isUsesWeight ? (defaultWeight ?? undefined) : undefined,
+      isUsesWeight,
+      defaultWeight: isUsesWeight ? defaultWeight : undefined,
     });
   };
   return (
     <div className={styles["exercise-card"]}>
-      <h2>NEW EXERCISE</h2>
+      <h2>{mode === "create" ? "NEW EXERCISE" : "EDIT EXERCISE"}</h2>
       <CategoryBar
+        categories={categories}
         selectedCategory={selectedCategory}
         onSelectCategory={setSelectedCategory}
         showAllOption={false}
@@ -56,11 +80,12 @@ const AddNewExercise = ({ onClose, onAddExercise }: Props) => {
 
           {isUsesWeight && (
             <input
-              value={defaultWeight === null ? "" : String(defaultWeight)}
+              value={defaultWeight ?? ""}
               onChange={(e) => {
                 const raw = e.target.value;
+
                 if (/^\d*$/.test(raw)) {
-                  setDefaultWeight(Number(raw));
+                  setDefaultWeight(raw === "" ? undefined : Number(raw));
                 }
               }}
               placeholder="Default weight (kg)"
@@ -76,7 +101,7 @@ const AddNewExercise = ({ onClose, onAddExercise }: Props) => {
             onIonChange={(e) => {
               setIsUsesWeight(e.detail.checked);
               if (!e.detail.checked) {
-                setDefaultWeight(null);
+                setDefaultWeight(undefined);
               }
             }}
           />
@@ -86,9 +111,13 @@ const AddNewExercise = ({ onClose, onAddExercise }: Props) => {
       <div onClick={onClose} className={styles["close-button"]}>
         <Close />
       </div>
-      <Button variant="add-set" children="ADD" onClick={handleAdd} />
+      <Button
+        variant="add-set"
+        children={mode === "create" ? "ADD" : "SAVE"}
+        onClick={handleAdd}
+      />
     </div>
   );
 };
 
-export default AddNewExercise;
+export default ExerciseForm;

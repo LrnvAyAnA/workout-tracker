@@ -1,20 +1,20 @@
-import { mockCategories } from "../../data/mockCategories";
-import { getCategories } from "../../servises/workoutService";
 import "./categoryBar.css";
 import Button from "../button/Button";
+import { Category } from "../../types/workout";
 
 type CategoryBarProps = {
+  categories: Category[];
   selectedCategory: number | null;
   onSelectCategory: (id: number | null) => void;
   showAllOption: boolean;
 };
 
 const CategoryBar = ({
+  categories,
   selectedCategory,
   onSelectCategory,
   showAllOption,
 }: CategoryBarProps) => {
-  const categories = getCategories(mockCategories);
   return (
     <div className="category-filter">
       {showAllOption ? (
