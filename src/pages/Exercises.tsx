@@ -20,7 +20,6 @@ import ExerciseCard from "../components/exerciseCard/ExerciseCard";
 import Button from "../components/button/Button";
 import ExerciseForm from "../components/exerciseForm/ExerciseForm";
 import { ExerciseWithLastWeight } from "../types/workoutCard";
-// import { DebugDatabase } from "../components/debugScreen";
 import {
   createExercise,
   deleteExercise,
@@ -148,7 +147,6 @@ const Exercises: React.FC = () => {
             </Button>
           )}
         </main>
-        {/* <DebugDatabase /> */}
       </IonContent>
     </IonPage>
   );

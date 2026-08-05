@@ -48,7 +48,7 @@ const App: React.FC = () => (
           <Route exact path="/workout">
             <Workout />
           </Route>
-          <Route exact path="/tab2">
+          <Route exact path="/exercise">
             <Exercises />
           </Route>
           <Route exact path="/">
@@ -60,7 +60,7 @@ const App: React.FC = () => (
             <IonIcon aria-hidden="true" icon={workout} />
             <IonLabel>WORKOUT</IonLabel>
           </IonTabButton>
-          <IonTabButton tab="tab2" href="/tab2">
+          <IonTabButton tab="exercise" href="/exercise">
             <IonIcon aria-hidden="true" icon={exercises} />
             <IonLabel>EXERCISES</IonLabel>
           </IonTabButton>
