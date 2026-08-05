@@ -1,4 +1,4 @@
-import { Set } from "../../types/workout";
+import { WorkoutSet } from "../../types/workout";
 
 type WorkoutExerciseRow = {
   id: number;
@@ -15,11 +15,7 @@ type WorkoutExerciseRow = {
   workout_id: number;
 };
 
-export function mapSetFromDb(row: WorkoutExerciseRow): Set {
-  if (row.used_weight === null) {
-    throw new Error("Weight set cannot have null used_weight");
-  }
-
+export function mapSetFromDb(row: WorkoutExerciseRow): WorkoutSet {
   return {
     id: row.set_id,
     exerciseId: row.id,

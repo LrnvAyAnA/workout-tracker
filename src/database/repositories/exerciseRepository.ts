@@ -1,5 +1,4 @@
 import { Capacitor } from "@capacitor/core";
-import { Exercise } from "../../types/workout";
 import { getDatabase } from "../sqlite";
 import { mockExercises } from "../../data/mockExercises";
 import { mockCategories } from "../../data/mockCategories";
@@ -13,6 +12,7 @@ import {
   getMockExercisesWithLastWeight,
 } from "../../servises/workoutService";
 import { CreateExerciseInput } from "../../types/exercise";
+import { mapExerciseWithLastWeightFromDb } from "../mappers/exerciseMapper";
 
 export async function getExercisesWithLastWeight(
   categoryId?: number,
@@ -24,22 +24,32 @@ export async function getExercisesWithLastWeight(
       SELECT 
         exercises.id,
         exercises.name,
+        exercises.category_id,
         exercises.has_weight,
         exercises.default_weight,
         categories.name AS category_name,
-         (
-        SELECT sets.used_weight
-        FROM sets
-        JOIN workouts ON workouts.id = sets.workout_id
-        WHERE sets.exercise_id = exercises.id
-        ORDER BY workouts.date DESC
-        LIMIT 1
-    ) AS last_weight
+        (
+  SELECT sets.used_weight
+  FROM sets
+  JOIN workouts ON workouts.id = sets.workout_id
+  WHERE sets.exercise_id = exercises.id
+    AND workouts.status = 'completed'
+  ORDER BY workouts.date DESC, sets.id DESC
+  LIMIT 1
+) AS last_weight,
+(
+  SELECT MAX(sets.used_weight)
+  FROM sets
+  JOIN workouts ON workouts.id = sets.workout_id
+  WHERE sets.exercise_id = exercises.id
+    AND workouts.status = 'completed'
+) AS max_weight
       FROM exercises
       JOIN categories ON categories.id = exercises.category_id
       WHERE exercises.deleted_at IS NULL
       ${categoryId ? "AND exercises.category_id = ?" : ""}
     `;
+
     const result = await db.query(sql, categoryId ? [categoryId] : []);
     return (result.values ?? []).map(mapExerciseWithLastWeightFromDb);
   } else {
@@ -122,11 +132,4 @@ export async function deleteExercise(id: number) {
   }
 
   deleteMockExercise(id);
-}
-function mapExerciseWithLastWeightFromDb(
-  value: any,
-  index: number,
-  array: any[],
-): ExerciseWithLastWeight {
-  throw new Error("Function not implemented.");
 }

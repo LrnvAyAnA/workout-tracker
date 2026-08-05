@@ -1,48 +1,84 @@
 import { mockCategories } from "../data/mockCategories";
 import { mockExercises } from "../data/mockExercises";
+import { mockSets } from "../data/mockSets";
 import { mockWorkouts } from "../data/mockWorkouts";
 import { CreateExerciseInput } from "../types/exercise";
-import { Category, Exercise, Set, WorkoutType } from "../types/workout";
+import { Category, Exercise, WorkoutSet, WorkoutType } from "../types/workout";
+import {
+  CreateSetInput,
+  ExerciseWithLastWeight,
+  ExerciseWorkoutCard,
+  UpdateSetInput,
+} from "../types/workoutCard";
 
 export function getWorkoutExercises(
   workoutId: number,
   exercises: Exercise[],
-  sets: Set[],
+  sets: WorkoutSet[],
   categories: Category[],
-) {
-  return exercises
-    .filter((exercise) =>
-      sets.some(
-        (set) => set.exerciseId === exercise.id && set.workoutId === workoutId,
-      ),
-    )
-    .map((exercise) => {
-      const category = categories.find(
-        (category) => category.id === exercise.categoryId,
-      );
-      if (!category) {
-        throw new Error("Category not found");
-      }
+  workouts: WorkoutType[],
+): ExerciseWorkoutCard[] {
+  const workoutSets = sets.filter((s) => s.workoutId === workoutId);
+  const exerciseIds = [...new Set(workoutSets.map((s) => s.exerciseId))];
 
-      const exerciseSets = sets.filter(
-        (set) => set.exerciseId === exercise.id && set.workoutId === workoutId,
-      );
+  // Только завершённые тренировки для статистики
+  const completedWorkoutIds = new Set(
+    workouts.filter((w) => w.status === "completed").map((w) => w.id),
+  );
 
-      return {
-        exercise,
-        category,
-        sets: exerciseSets,
-      };
-    });
+  return exerciseIds.map((exId) => {
+    const exercise = exercises.find((e) => e.id === exId)!;
+    const category = categories.find((c) => c.id === exercise.categoryId)!;
+    const exerciseSets = workoutSets
+      .filter((s) => s.exerciseId === exId)
+      .sort((a, b) => a.id - b.id);
+
+    // last used: только из completed
+    const prevSets = sets
+      .filter(
+        (s) =>
+          s.exerciseId === exId &&
+          s.workoutId !== workoutId &&
+          completedWorkoutIds.has(s.workoutId),
+      )
+      .sort((a, b) => {
+        const dateA = workouts.find((w) => w.id === a.workoutId)?.date ?? "";
+        const dateB = workouts.find((w) => w.id === b.workoutId)?.date ?? "";
+        if (dateB !== dateA) return dateB.localeCompare(dateA);
+        return b.id - a.id;
+      });
+    const lastUsedWeight = prevSets[0]?.usedWeight ?? null;
+
+    // PR: только из completed
+    const completedSets = sets.filter(
+      (s) => s.exerciseId === exId && completedWorkoutIds.has(s.workoutId),
+    );
+    const allWeights = completedSets
+      .filter((s) => s.usedWeight != null)
+      .map((s) => s.usedWeight!);
+    const maxWeight = allWeights.length > 0 ? Math.max(...allWeights) : null;
+
+    return {
+      exercise,
+      category,
+      sets: exerciseSets,
+      lastUsedWeight,
+      maxWeight,
+    };
+  });
 }
 
 export function getMockExercisesWithLastWeight(
   categories: Category[],
   workouts: WorkoutType[],
   exercises: Exercise[],
-  sets: Set[],
+  sets: WorkoutSet[],
   categoryId?: number,
 ) {
+  const completedWorkoutIds = new Set(
+    workouts.filter((w) => w.status === "completed").map((w) => w.id),
+  );
+
   let exercisesFiltered = exercises;
   if (categoryId) {
     exercisesFiltered = exercises.filter(
@@ -50,46 +86,37 @@ export function getMockExercisesWithLastWeight(
     );
   }
 
-  const setFiltred = sets.filter((set) =>
-    exercisesFiltered.some((exercise) => set.exerciseId === exercise.id),
-  );
-
-  const setsWithDate = setFiltred.map((set) => {
-    const workout = workouts.find((w) => w.id === set.workoutId);
-    return { ...set, date: workout?.date };
-  });
-  const validSets = setsWithDate.filter(
-    (s): s is typeof s & { date: string } => s.date !== undefined,
-  );
-  const groupedByExercise = validSets.reduce(
-    (acc, set) => {
-      if (!acc[set.exerciseId]) acc[set.exerciseId] = [];
-      acc[set.exerciseId].push(set);
-      return acc;
-    },
-    {} as Record<number, typeof validSets>,
-  );
-
-  const lastWeights = Object.entries(groupedByExercise).map(
-    ([exerciseId, sets]) => {
-      const latestSet = sets.sort(
-        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-      )[0];
-      return {
-        exerciseId: Number(exerciseId),
-        lastWeight: latestSet.usedWeight,
-      };
-    },
-  );
-
   return exercisesFiltered.map((exercise) => {
     const category = categories.find((cat) => cat.id === exercise.categoryId);
-    const weightEntry = lastWeights.find((lw) => lw.exerciseId === exercise.id);
+
+    const exerciseSets = sets
+      .filter(
+        (set) =>
+          set.exerciseId === exercise.id &&
+          completedWorkoutIds.has(set.workoutId),
+      )
+      .map((set) => {
+        const workout = workouts.find((w) => w.id === set.workoutId);
+        return { ...set, date: workout!.date };
+      })
+      .sort((a, b) => {
+        const dateDiff =
+          new Date(b.date).getTime() - new Date(a.date).getTime();
+        if (dateDiff !== 0) return dateDiff;
+        return b.id - a.id;
+      });
+
+    const lastWeight = exerciseSets[0]?.usedWeight ?? null;
+
+    const maxWeight = exerciseSets.length
+      ? Math.max(...exerciseSets.map((s) => s.usedWeight ?? 0))
+      : null;
 
     return {
       ...exercise,
-      categoryName: category?.name,
-      lastWeight: weightEntry?.lastWeight,
+      categoryName: category?.name ?? undefined,
+      lastWeight,
+      maxWeight,
     };
   });
 }
@@ -125,7 +152,6 @@ export function deleteMockExercise(id: number) {
 }
 
 export function getMockCategories(): Category[] {
-  console.log("я был в маппинге");
   return [...mockCategories];
 }
 
@@ -144,4 +170,66 @@ export function createMockWorkout(
   };
   mockWorkouts.push(newWorkout);
   return newWorkout;
+}
+
+export function deleteMockWorkout(workoutId: number) {
+  const index = mockWorkouts.findIndex((workout) => workout.id === workoutId);
+
+  if (index !== -1) {
+    mockWorkouts.splice(index, 1);
+  }
+}
+
+export function addMockExerciseToWorkout(
+  workoutId: number,
+  exercise: ExerciseWithLastWeight,
+) {
+  mockSets.push({
+    id: Date.now(),
+    exerciseId: exercise.id,
+    workoutId,
+    reps: 12,
+    usedWeight: exercise.isUsesWeight ? (exercise.defaultWeight ?? null) : null,
+  });
+}
+
+export function addMockSet(set: CreateSetInput) {
+  mockSets.push({
+    ...set,
+    id: Date.now(),
+  });
+}
+
+export function updateMockSet(setId: number, changes: UpdateSetInput) {
+  const index = mockSets.findIndex((set) => set.id === setId);
+
+  if (index === -1) return;
+
+  mockSets[index] = {
+    ...mockSets[index],
+    ...changes,
+  };
+}
+
+export function deleteMockSet(setId: number) {
+  const idx = mockSets.findIndex((s) => s.id === setId);
+  if (idx === -1) return;
+
+  const { workoutId } = mockSets[idx];
+  mockSets.splice(idx, 1);
+
+  const workoutHasSets = mockSets.some((s) => s.workoutId === workoutId);
+  if (!workoutHasSets) {
+    deleteMockWorkout(workoutId);
+  }
+}
+
+export function updateMockWorkoutStatus(
+  workoutId: number,
+  status: "planned" | "completed",
+): void {
+  const workout = mockWorkouts.find((w) => w.id === workoutId);
+  if (workout) {
+    workout.status = status;
+  }
 }

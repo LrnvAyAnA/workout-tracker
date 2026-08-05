@@ -14,9 +14,11 @@ export async function initializeDatabase() {
   await db.execute(createWorkoutsTable);
   await db.execute(createSetsTable);
 
+  console.log("DB: Tables created");
+
   await seedCategories();
 
-  console.log("Tables created");
+  console.log("DB: seedCategories");
 
   return db;
 }

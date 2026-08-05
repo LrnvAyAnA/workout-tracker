@@ -3,4 +3,11 @@
   gap: 8px;
   overflow-x: auto;
   padding: 0 16px;
+
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.category-bar::-webkit-scrollbar {
+  display: none;
 }

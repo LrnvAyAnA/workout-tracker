@@ -1,11 +1,10 @@
-import { useState } from "react";
-import { ExerciseWorkoutCard } from "../../types/workoutCard";
+import { useEffect, useRef, useState } from "react";
+import { ExerciseWorkoutCard, UpdateSetInput } from "../../types/workoutCard";
 import Button from "../button/Button";
 import InlineNumberInput from "../inlineNumberInput/InlineNumberInput";
 import styles from "./setCard.module.css";
 import CheckMark from "../../assets/icons/checkMark.svg?react";
 import { trash } from "ionicons/icons";
-import { Set } from "../../types/workout";
 import {
   IonIcon,
   IonItem,
@@ -16,87 +15,86 @@ import {
 
 interface SetCardProps {
   data: ExerciseWorkoutCard;
+  onAddSet: (exercise: ExerciseWorkoutCard) => void;
+  onDeleteSet: (id: number) => void;
+  onUpdateSet: (id: number, changes: UpdateSetInput) => void;
 }
 
-type EditingField = {
-  setId: number;
-  field: "reps" | "weight";
-  value: number;
-};
-
-const SetCard = ({ data }: SetCardProps) => {
-  const [sets, setSets] = useState<Set[]>(data.sets);
-
-  const [editing, setEditing] = useState<EditingField | null>(null);
-  const [invalidSetId, setInvalidSetId] = useState<number | null>(null);
-  const handleUpdateReps = (setId: number, newReps: number) => {
-    console.log("newReps", newReps);
-    setSets((prev) =>
-      prev.map((set) => (set.id === setId ? { ...set, reps: newReps } : set)),
-    );
-  };
-
-  const handleUpdateWeight = (setId: number, newWeight: number) => {
-    setSets((prev) =>
-      prev.map((set) =>
-        set.id === setId ? { ...set, usedWeight: newWeight } : set,
-      ),
-    );
-    console.log("newWeight", newWeight);
-  };
-
-  const handleAddSet = () => {
-    const lastSet = sets.at(-1);
-
-    const initialWeight = data.exercise.defaultWeight;
-    console.log(data.exercise);
-    const initialReps = lastSet?.reps ?? 0;
-
-    const newSet: Set = {
-      id: Date.now(),
-      exerciseId: data.exercise.id,
-      workoutId: lastSet?.workoutId ?? 0,
-      reps: initialReps,
-      usedWeight: initialWeight ?? 0,
+type EditingField =
+  | {
+      setId: number;
+      field: "reps";
+      value: number;
+    }
+  | {
+      setId: number;
+      field: "weight";
+      value: number | null;
     };
 
-    setSets((prevSets) => [...prevSets, newSet]);
-  };
+const SetCard = ({
+  data,
+  onAddSet,
+  onUpdateSet,
+  onDeleteSet,
+}: SetCardProps) => {
+  const [editing, setEditing] = useState<EditingField | null>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
 
-  const handleDeleteSet = (setId: number) => {
-    setSets((prevSets) => prevSets.filter((s) => s.id !== setId));
-  };
-
-  const handleSave = (editing: EditingField | null) => {
-    if (editing) {
-      if (editing.field == "reps") {
-        handleUpdateReps(editing.setId, editing.value);
-      } else {
-        handleUpdateWeight(editing.setId, editing.value);
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (cardRef.current && !cardRef.current.contains(e.target as Node)) {
+        setEditing(null);
       }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+  const handleSave = (editing: EditingField | null) => {
+    if (!editing) return;
+
+    if (editing.field === "reps") {
+      onUpdateSet(editing.setId, {
+        reps: editing.value,
+      });
+    } else {
+      onUpdateSet(editing.setId, {
+        usedWeight: editing.value,
+      });
     }
+
     setEditing(null);
   };
 
   return (
-    <div className={styles["exercise-card"]}>
+    <div className={styles["exercise-card"]} ref={cardRef}>
       <div className={styles["header-card"]}>
         <div className={styles["header-card-info"]}>
           <h3>{data.exercise.name}</h3>
           <span className={styles["category"]}>{data.category.name}</span>
         </div>
-        <div className={styles["header-card-weights"]}>
-          <span>
-            max cur weight <span className="unit"> kg</span>
-          </span>
-          <span>
-            max prev weight <span className="unit"> kg</span>
-          </span>
-        </div>
+        {data.exercise.isUsesWeight ? (
+          <div className={styles["header-card-weights"]}>
+            <div className={styles["weight-stat"]}>
+              <span className={styles["stat-label"]}>PR </span>
+              <span className={styles["stat-value"]}>
+                {data.maxWeight !== null ? `${data.maxWeight}kg` : "-"}
+              </span>
+            </div>
+            <div className={styles["weight-stat"]}>
+              <span className={styles["stat-label"]}>last used </span>
+              <span className={styles["stat-value"]}>
+                {data.lastUsedWeight !== null
+                  ? `${data.lastUsedWeight} kg`
+                  : "-"}
+              </span>
+            </div>
+          </div>
+        ) : null}
       </div>
       <div className={styles["card-content"]}>
         <div className={styles["sets-list"]}>
-          {sets.map((set) => (
+          {data.sets.map((set) => (
             <IonItemSliding key={set.id}>
               <IonItem className={styles["set-item"]}>
                 <div className={styles["card-field"]}>
@@ -118,11 +116,7 @@ const SetCard = ({ data }: SetCardProps) => {
                             value: set.reps,
                           })
                         }
-                        onBlur={() => {
-                          setTimeout(() => {
-                            setEditing(null);
-                          }, 150);
-                        }}
+                        onEnter={() => handleSave(editing)}
                         onChange={(newValue) =>
                           setEditing({
                             setId: set.id,
@@ -166,11 +160,7 @@ const SetCard = ({ data }: SetCardProps) => {
                               value: set.usedWeight,
                             });
                           }}
-                          onBlur={() => {
-                            setTimeout(() => {
-                              setEditing(null);
-                            }, 150);
-                          }}
+                          onEnter={() => handleSave(editing)}
                           onChange={(newValue) =>
                             setEditing({
                               setId: set.id,
@@ -201,7 +191,7 @@ const SetCard = ({ data }: SetCardProps) => {
               <IonItemOptions side="end">
                 <IonItemOption
                   color="danger"
-                  onClick={() => handleDeleteSet(set.id)}
+                  onClick={() => onDeleteSet(set.id)}
                 >
                   <IonIcon slot="icon-only" icon={trash} />
                 </IonItemOption>
@@ -213,7 +203,7 @@ const SetCard = ({ data }: SetCardProps) => {
           <Button
             variant="add-set"
             children="+ add set"
-            onClick={handleAddSet}
+            onClick={() => onAddSet(data)}
           />
         </div>
       </div>

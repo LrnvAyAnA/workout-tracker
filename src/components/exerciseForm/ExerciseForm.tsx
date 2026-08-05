@@ -9,13 +9,6 @@ import { CreateExerciseInput, ExerciseFormValues } from "../../types/exercise";
 import { Category } from "../../types/workout";
 import { getCategories } from "../../database/repositories/categoryRepository";
 
-type NewExerciseInput = {
-  name: string;
-  categoryId: number;
-  isUsesWeight: boolean;
-  defaultWeight?: number;
-};
-
 type Props = {
   initialValues?: ExerciseFormValues;
   mode: "create" | "edit";
@@ -32,8 +25,8 @@ const ExerciseForm = ({ onClose, onSubmit, initialValues, mode }: Props) => {
   const [isUsesWeight, setIsUsesWeight] = useState(
     initialValues?.isUsesWeight ?? false,
   );
-  const [defaultWeight, setDefaultWeight] = useState(
-    initialValues?.defaultWeight,
+  const [defaultWeight, setDefaultWeight] = useState<number | null>(
+    initialValues?.defaultWeight ?? null,
   );
 
   useEffect(() => {
@@ -49,7 +42,7 @@ const ExerciseForm = ({ onClose, onSubmit, initialValues, mode }: Props) => {
       return;
     }
 
-    if (isUsesWeight && defaultWeight === undefined) {
+    if (isUsesWeight && defaultWeight === null) {
       return;
     }
 
@@ -57,7 +50,7 @@ const ExerciseForm = ({ onClose, onSubmit, initialValues, mode }: Props) => {
       name,
       categoryId: selectedCategory,
       isUsesWeight,
-      defaultWeight: isUsesWeight ? defaultWeight : undefined,
+      defaultWeight: isUsesWeight ? defaultWeight : null,
     });
   };
   return (
@@ -85,7 +78,7 @@ const ExerciseForm = ({ onClose, onSubmit, initialValues, mode }: Props) => {
                 const raw = e.target.value;
 
                 if (/^\d*$/.test(raw)) {
-                  setDefaultWeight(raw === "" ? undefined : Number(raw));
+                  setDefaultWeight(raw === "" ? null : Number(raw));
                 }
               }}
               placeholder="Default weight (kg)"
@@ -101,7 +94,7 @@ const ExerciseForm = ({ onClose, onSubmit, initialValues, mode }: Props) => {
             onIonChange={(e) => {
               setIsUsesWeight(e.detail.checked);
               if (!e.detail.checked) {
-                setDefaultWeight(undefined);
+                setDefaultWeight(null);
               }
             }}
           />

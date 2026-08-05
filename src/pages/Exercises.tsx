@@ -9,17 +9,18 @@ import {
   IonPage,
   IonTitle,
   IonToolbar,
+  useIonViewWillEnter,
 } from "@ionic/react";
 import { trash } from "ionicons/icons";
 
 import styles from "./exercises.module.css";
 import CategoryBar from "../components/categoryBar/CategoryBar";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import ExerciseCard from "../components/exerciseCard/ExerciseCard";
 import Button from "../components/button/Button";
 import ExerciseForm from "../components/exerciseForm/ExerciseForm";
 import { ExerciseWithLastWeight } from "../types/workoutCard";
-import { DebugDatabase } from "../components/debugScreen";
+// import { DebugDatabase } from "../components/debugScreen";
 import {
   createExercise,
   deleteExercise,
@@ -39,27 +40,26 @@ const Exercises: React.FC = () => {
   const [isAddNewExercise, setIsAddNewExercise] = useState(false);
   const [editingExercise, setEditingExercise] = useState<Exercise | null>(null);
 
-  useEffect(() => {
+  useIonViewWillEnter(() => {
     loadCategories();
     loadExercises();
-  }, []);
+  });
 
   async function loadCategories() {
     const data = await getCategories();
+    console.log("categories loaded:", data);
     setCategories(data);
   }
-  useEffect(() => {
-    loadExercises();
-  }, [selectedCategory]);
-
-  async function loadExercises() {
+  const loadExercises = useCallback(async () => {
     const data = await getExercisesWithLastWeight(
       selectedCategory ?? undefined,
     );
-
     setExercises(data);
-  }
+  }, [selectedCategory]);
 
+  useEffect(() => {
+    loadExercises();
+  }, [loadExercises]);
   const handleAddExercise = async (newExercise: CreateExerciseInput) => {
     await createExercise(newExercise);
 
@@ -94,7 +94,7 @@ const Exercises: React.FC = () => {
         </IonToolbar>
       </IonHeader>
       <IonContent fullscreen>
-        <main className={styles["workout-page"]}>
+        <main className={styles["exercise-page"]}>
           <CategoryBar
             categories={categories}
             selectedCategory={selectedCategory}
@@ -134,7 +134,7 @@ const Exercises: React.FC = () => {
                 categoryId: selectedCategory,
                 name: "",
                 isUsesWeight: false,
-                defaultWeight: undefined,
+                defaultWeight: null,
               }}
               onSubmit={handleAddExercise}
               onClose={() => setIsAddNewExercise(false)}

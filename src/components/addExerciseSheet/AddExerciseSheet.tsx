@@ -1,6 +1,6 @@
-import { IonModal } from "@ionic/react";
+import { IonContent, IonModal, useIonViewWillEnter } from "@ionic/react";
 import styles from "./addExerciseSheet.module.css";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import CategoryBar from "../categoryBar/CategoryBar";
 import {} from "../../servises/workoutService";
 import ExerciseCard from "../exerciseCard/ExerciseCard";
@@ -30,25 +30,26 @@ const AddExerciseSheet = ({
 
   const [exercises, setExercises] = useState<ExerciseWithLastWeight[]>([]);
 
-  useEffect(() => {
+  useIonViewWillEnter(() => {
     loadCategories();
-  }, []);
+    loadExercises();
+  });
 
   async function loadCategories() {
     const data = await getCategories();
     setCategories(data);
   }
 
-  useEffect(() => {
-    loadExercises();
-  }, [selectedCategory]);
-
-  async function loadExercises() {
+  const loadExercises = useCallback(async () => {
     const data = await getExercisesWithLastWeight(
       selectedCategory ?? undefined,
     );
     setExercises(data);
-  }
+  }, [selectedCategory]);
+
+  useEffect(() => {
+    loadExercises();
+  }, [loadExercises]);
 
   const availableExercises = exercises.filter(
     (exercise) =>
@@ -60,28 +61,32 @@ const AddExerciseSheet = ({
       isOpen={isOpen}
       onDidDismiss={onClose}
       initialBreakpoint={0.75}
-      breakpoints={[0, 0.25, 0.5, 0.75]}
+      breakpoints={[0, 0.25, 0.75, 1]}
       className={styles["custom-modal"]}
     >
-      <div className={styles["modal-content"]}>
+      <div className={styles["sheet-wrapper"]}>
         <div className={styles["title"]}>
           <h2>Add exercise</h2>
         </div>
-        <CategoryBar
-          categories={categories}
-          selectedCategory={selectedCategory}
-          onSelectCategory={setSelectedCategory}
-          showAllOption={true}
-        />
-        {availableExercises.map((exercise) => (
-          <div
-            key={exercise.id}
-            className={styles["exercise-select-item"]}
-            onClick={() => handleSelectExercise(exercise)}
-          >
-            <ExerciseCard data={exercise} />
+        <IonContent className={styles["sheet-scroll"]}>
+          <div className={styles["content"]}>
+            <CategoryBar
+              categories={categories}
+              selectedCategory={selectedCategory}
+              onSelectCategory={setSelectedCategory}
+              showAllOption={true}
+            />
+            {availableExercises.map((exercise) => (
+              <div
+                key={exercise.id}
+                className={styles["exercise-select-item"]}
+                onClick={() => handleSelectExercise(exercise)}
+              >
+                <ExerciseCard data={exercise} />
+              </div>
+            ))}
           </div>
-        ))}
+        </IonContent>
       </div>
     </IonModal>
   );

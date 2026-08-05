@@ -6,5 +6,5 @@ export type ExerciseFormValues = {
   name: string;
   categoryId: number | null;
   isUsesWeight: boolean;
-  defaultWeight?: number;
+  defaultWeight: number | null;
 };

@@ -118,3 +118,7 @@
   --border-width: 1px;
   --border-style: solid;
 }
+
+.stat-label {
+  color: var(--color-inactive);
+}

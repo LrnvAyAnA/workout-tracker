@@ -1,13 +1,11 @@
-// import Button from "../button/Button";
 import styles from "./inlineNumberInput.module.css";
-// import CheckMark from "../../assets/icons/checkMark.svg?react";
 
 type Props = {
-  value: number;
+  value: number | null;
   onFocus?: () => void;
   isVisible: boolean;
-  onBlur: () => void;
   onChange: (value: number) => void;
+  onEnter?: () => void;
 };
 
 const InlineNumberInput = ({
@@ -15,7 +13,7 @@ const InlineNumberInput = ({
   isVisible,
   onChange,
   onFocus,
-  onBlur,
+  onEnter,
 }: Props) => {
   return (
     <div className={styles["edit-field"]}>
@@ -23,7 +21,7 @@ const InlineNumberInput = ({
         className={`${styles["input-value"]} ${isVisible ? styles["active"] : ""}`}
       >
         <input
-          value={value}
+          value={value ?? ""}
           onChange={(e) => {
             const raw = e.target.value;
             if (/^\d*$/.test(raw)) {
@@ -32,7 +30,12 @@ const InlineNumberInput = ({
           }}
           onFocus={onFocus}
           inputMode="numeric"
-          onBlur={onBlur}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && onEnter) {
+              e.preventDefault();
+              onEnter();
+            }
+          }}
         />
       </div>
     </div>
